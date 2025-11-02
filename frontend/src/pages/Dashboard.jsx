@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plus, LogIn, Video, Clock, Users, TrendingUp } from 'lucide-react';
@@ -6,36 +7,34 @@ import Button from '../components/Button';
 import MeetingTile from '../components/MeetingTile';
 import AnalyticsCard from '../components/AnalyticsCard';
 import { MOCK_ANALYTICS } from '../utils/constants';
+import { meetingService } from '../services/meetingService';
+import { useAuth } from '../hooks/useAuth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [recentMeetings, setRecentMeetings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentMeetings = [
-    {
-      id: '1',
-      title: 'Team Standup',
-      createdAt: '2024-01-15T10:00:00Z',
-      duration: 1800,
-      participantCount: 8,
-      engagementScore: 85,
-    },
-    {
-      id: '2',
-      title: 'Client Presentation',
-      createdAt: '2024-01-14T14:30:00Z',
-      duration: 3600,
-      participantCount: 5,
-      engagementScore: 92,
-    },
-    {
-      id: '3',
-      title: 'Project Review',
-      createdAt: '2024-01-13T11:00:00Z',
-      duration: 2700,
-      participantCount: 12,
-      engagementScore: 78,
-    },
-  ];
+  useEffect(() => {
+    if (user?._id || user?.id) {
+      meetingService.getUserMeetings(user._id || user.id)
+        .then(meetings => {
+          setRecentMeetings(meetings.map(m => ({
+            id: m._id || m.id,
+            title: m.topic,
+            createdAt: m.createdAt,
+            duration: m.endedAt && m.createdAt ? new Date(m.endedAt) - new Date(m.createdAt) : 0,
+            participantCount: m.participants?.length || 0,
+            engagementScore: 75, // placeholder
+          })));
+        })
+        .catch(err => console.error('Failed to load meetings', err))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   return (
     <DashboardLayout>

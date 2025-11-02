@@ -51,9 +51,14 @@ const JoinMeeting = () => {
     setLoading(true);
 
     try {
-      joinMeeting(formData.meetingCode, formData.name);
-      navigate(`/meeting/${formData.meetingCode}`);
+      const result = await joinMeeting(formData.meetingCode);
+      if (result && (result._id || result.id)) {
+        navigate(`/meeting/${formData.meetingCode}`);
+      } else {
+        showError('Failed to join meeting. Please check the meeting code.');
+      }
     } catch (error) {
+      console.error('Join meeting error:', error);
       showError('Failed to join meeting. Please check the meeting code.');
     } finally {
       setLoading(false);

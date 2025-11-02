@@ -1,8 +1,17 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Mic, MicOff, Video, VideoOff } from 'lucide-react';
 import ExpressionOverlay from './ExpressionOverlay';
 
-const ParticipantCard = ({ participant, expression }) => {
+const ParticipantCard = ({ participant, expression, stream, reaction }) => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -23,12 +32,32 @@ const ParticipantCard = ({ participant, expression }) => {
         </div>
       ) : (
         <>
-          <img
-            src={participant.avatar}
-            alt={participant.name}
-            className="w-full h-full object-cover"
-          />
+          {stream ? (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted={participant.isMuted}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <img
+              src={participant.avatar}
+              alt={participant.name}
+              className="w-full h-full object-cover"
+            />
+          )}
           {expression && <ExpressionOverlay expression={expression} />}
+          {reaction && (
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0, y: [0, -20, 0] }}
+              exit={{ scale: 0 }}
+              className="absolute top-4 left-4 text-6xl pointer-events-none z-10"
+            >
+              {reaction.emoji}
+            </motion.div>
+          )}
         </>
       )}
 

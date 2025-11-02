@@ -21,6 +21,10 @@ export const meetingService = {
     return apiClient.patch(`/meetings/leave/${meetingId}`, {});
   },
 
+  async endMeeting(meetingId) {
+    return apiClient.post(`/meetings/${meetingId}/end`, {});
+  },
+
   // Placeholders for future backend features
   async sendMessage() {
     throw new Error('sendMessage not implemented on backend');

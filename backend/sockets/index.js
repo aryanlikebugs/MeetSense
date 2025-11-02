@@ -107,6 +107,11 @@ export function initSocket(server) {
       io.to(meetingId).emit('presence-update', { userId: socket.user.id, micOn: on });
     });
 
+    socket.on('reaction', ({ meetingId, reaction }) => {
+      io.to(meetingId).emit('reaction', { userId: socket.user.id, reaction });
+      console.log(`User ${socket.user.id} reacted with ${reaction} in meeting ${meetingId}`);
+    });
+
     socket.on('disconnect', async () => {
       try {
         disconnectAt = new Date();

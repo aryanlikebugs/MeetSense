@@ -11,7 +11,7 @@ import { useNotifications } from '../hooks/useNotifications';
 const CreateMeeting = () => {
   const navigate = useNavigate();
   const { createMeeting } = useMeeting();
-  const { showSuccess, showInfo } = useNotifications();
+  const { showSuccess, showInfo, showError } = useNotifications();
 
   const [meetingTitle, setMeetingTitle] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,14 +26,22 @@ const CreateMeeting = () => {
     setLoading(true);
 
     try {
-      const meeting = createMeeting({
-        title: meetingTitle,
+      const meeting = await createMeeting({
+        topic: meetingTitle,
       });
 
-      setGeneratedMeeting(meeting);
-      showSuccess('Meeting created successfully!');
+      if (meeting && (meeting._id || meeting.id)) {
+        setGeneratedMeeting({
+          id: meeting._id || meeting.id,
+          title: meeting.topic || meetingTitle,
+        });
+        showSuccess('Meeting created successfully!');
+      } else {
+        showError('Failed to create meeting. Please try again.');
+      }
     } catch (error) {
       console.error('Error creating meeting:', error);
+      showError('Failed to create meeting. Please try again.');
     } finally {
       setLoading(false);
     }
