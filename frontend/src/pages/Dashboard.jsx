@@ -6,7 +6,6 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import Button from '../components/Button';
 import MeetingTile from '../components/MeetingTile';
 import AnalyticsCard from '../components/AnalyticsCard';
-import { MOCK_ANALYTICS } from '../utils/constants';
 import { meetingService } from '../services/meetingService';
 import { useAuth } from '../hooks/useAuth';
 
@@ -15,6 +14,13 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [recentMeetings, setRecentMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const totalMeetings = recentMeetings.length;
+  const totalParticipants = recentMeetings.reduce((acc, m) => acc + (m.participantCount || 0), 0);
+  const avgDurationMs = recentMeetings.length
+    ? Math.round(recentMeetings.reduce((acc, m) => acc + (m.duration || 0), 0) / recentMeetings.length)
+    : 0;
+  const avgDuration = avgDurationMs > 0 ? `${Math.round(avgDurationMs / 60000)} min` : '0 min';
+  const engagementRate = '-';
 
   useEffect(() => {
     if (user?._id || user?.id) {
@@ -63,25 +69,25 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <AnalyticsCard
             title="Total Meetings"
-            value={MOCK_ANALYTICS.totalMeetings}
+            value={totalMeetings}
             icon={Video}
             color="primary"
           />
           <AnalyticsCard
             title="Avg Duration"
-            value={MOCK_ANALYTICS.avgDuration}
+            value={avgDuration}
             icon={Clock}
             color="secondary"
           />
           <AnalyticsCard
             title="Total Participants"
-            value={MOCK_ANALYTICS.totalParticipants}
+            value={totalParticipants}
             icon={Users}
             color="success"
           />
           <AnalyticsCard
             title="Engagement Rate"
-            value={MOCK_ANALYTICS.engagementRate}
+            value={engagementRate}
             icon={TrendingUp}
             color="warning"
           />

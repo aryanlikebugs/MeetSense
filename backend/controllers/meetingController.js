@@ -27,30 +27,67 @@ export const getMeeting = async (req, res, next) => {
 export const joinMeeting = async (req, res, next) => {
   try {
     const { meetingId } = req.body;
-    const meeting = await Meeting.findById(meetingId);
+    // Use findOneAndUpdate with atomic operations to avoid version conflicts
+    const meeting = await Meeting.findOneAndUpdate(
+      { _id: meetingId },
+      {
+        $setOnInsert: { participants: [] }
+      },
+      { new: true, upsert: false }
+    );
     if (!meeting) return res.status(404).json({ message: 'Meeting not found' });
-    let participant = meeting.participants.find(p => p.userId.equals(req.user.id));
-    if (!participant) {
-      meeting.participants.push({ userId: req.user.id, joinTimes: [new Date()], leaveTimes: [], reconnectCount: 0 });
+    
+    // Check if participant exists
+    const existingParticipant = meeting.participants.find(p => String(p.userId) === String(req.user.id));
+    
+    if (!existingParticipant) {
+      // Add new participant atomically
+      await Meeting.findByIdAndUpdate(meetingId, {
+        $push: {
+          participants: {
+            userId: req.user.id,
+            joinTimes: [new Date()],
+            leaveTimes: [],
+            reconnectCount: 0
+          }
+        }
+      });
     } else {
-      participant.joinTimes.push(new Date());
+      // Update existing participant's joinTimes atomically
+      await Meeting.findOneAndUpdate(
+        { _id: meetingId, 'participants.userId': req.user.id },
+        {
+          $push: { 'participants.$.joinTimes': new Date() }
+        }
+      );
     }
-    await meeting.save();
-    res.json(meeting);
-  } catch (err) { next(err); }
+    
+    // Fetch the updated meeting with populated participants
+    const updatedMeeting = await Meeting.findById(meetingId).populate('participants.userId', 'name email avatar');
+    res.json(updatedMeeting);
+  } catch (err) { 
+    console.error('Join meeting error:', err);
+    next(err); 
+  }
 };
 
 // PATCH /api/meetings/leave/:id
 export const leaveMeeting = async (req, res, next) => {
   try {
-    const meeting = await Meeting.findById(req.params.id);
-    if (!meeting) return res.status(404).json({ message: 'Meeting not found' });
-    const participant = meeting.participants.find(p => p.userId.equals(req.user.id));
-    if (!participant) return res.status(400).json({ message: 'Not joined' });
-    participant.leaveTimes.push(new Date());
-    await meeting.save();
+    // Use atomic update to avoid version conflicts
+    const meeting = await Meeting.findOneAndUpdate(
+      { _id: req.params.id, 'participants.userId': req.user.id },
+      {
+        $push: { 'participants.$.leaveTimes': new Date() }
+      },
+      { new: true }
+    );
+    if (!meeting) return res.status(404).json({ message: 'Meeting not found or not joined' });
     res.json({ message: 'Left meeting' });
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error('Leave meeting error:', err);
+    next(err); 
+  }
 };
 
 // GET /api/meetings/history/:userId
@@ -76,7 +113,7 @@ export const endMeeting = async (req, res, next) => {
 // GET /api/meetings/:id/messages
 export const getMessages = async (req, res, next) => {
   try {
-    const meeting = await Meeting.findById(req.params.id).select('messages');
+    const meeting = await Meeting.findById(req.params.id).select('messages').populate('messages.senderId', 'name email avatar');
     if (!meeting) return res.status(404).json({ message: 'Meeting not found' });
     res.json(meeting.messages || []);
   } catch (err) { next(err); }

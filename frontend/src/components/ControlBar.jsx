@@ -28,17 +28,34 @@ const ControlBar = ({ onChatToggle, isRecording = false, isHost = false, onLeave
     setChatBadge(chatMessages?.length || 0);
   }, [chatMessages]);
 
-  const handleEndMeeting = async () => {
+  const handleEndMeeting = async (e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     if (!activeMeeting?._id || !socket) return;
     socket.emit('host-end-meeting', { meetingId: activeMeeting._id });
     await meetingService.endMeeting?.(activeMeeting._id).catch(() => {});
+    setShowEndConfirm(false);
     if (onLeaveMeeting) {
       onLeaveMeeting();
     }
-    setShowEndConfirm(false);
   };
 
-  const handleLeave = () => {
+  const handleHostLeaveOnly = async (e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    // Host leaves without ending for others
+    if (activeMeeting?._id && socket) {
+      socket.emit('leave-meeting', { meetingId: activeMeeting._id });
+    }
+    setShowEndConfirm(false);
+    if (onLeaveMeeting) {
+      onLeaveMeeting();
+    }
+  };
+
+  const handleLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onLeaveMeeting) {
       onLeaveMeeting();
     }
@@ -164,8 +181,14 @@ const ControlBar = ({ onChatToggle, isRecording = false, isHost = false, onLeave
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowEndConfirm(true)}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center gap-2 transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowEndConfirm(true);
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
               >
                 <PhoneOff size={20} />
                 <span className="font-medium">End Meeting</span>
@@ -177,18 +200,36 @@ const ControlBar = ({ onChatToggle, isRecording = false, isHost = false, onLeave
                     animate={{ scale: 1, opacity: 1 }}
                     className="bg-white rounded-2xl p-6 max-w-md"
                   >
-                    <h3 className="text-xl font-bold mb-2">End meeting for everyone?</h3>
-                    <p className="text-gray-600 mb-4">This will end the meeting for all participants.</p>
+                    <h3 className="text-xl font-bold mb-2">End meeting</h3>
+                    <p className="text-gray-600 mb-4">Choose whether to end for all or leave only for you.</p>
                     <div className="flex gap-3">
+                      <div className="flex flex-col gap-2 w-full">
+                        <button
+                          onClick={handleEndMeeting}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl cursor-pointer"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          End for All
+                        </button>
+                        <button
+                          onClick={handleHostLeaveOnly}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          className="w-full px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-xl cursor-pointer"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          Leave Only Host
+                        </button>
+                      </div>
                       <button
-                        onClick={handleEndMeeting}
-                        className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl"
-                      >
-                        End Meeting
-                      </button>
-                      <button
-                        onClick={() => setShowEndConfirm(false)}
-                        className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setShowEndConfirm(false);
+                        }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl cursor-pointer"
+                        style={{ pointerEvents: 'auto' }}
                       >
                         Cancel
                       </button>
@@ -202,7 +243,9 @@ const ControlBar = ({ onChatToggle, isRecording = false, isHost = false, onLeave
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleLeave}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center gap-2 transition-colors"
+              onMouseDown={(e) => e.stopPropagation()}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
             >
               <PhoneOff size={20} />
               <span className="font-medium">Leave Meeting</span>

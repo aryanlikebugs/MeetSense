@@ -60,14 +60,18 @@ const ChatBox = ({ isOpen, onClose }) => {
                   <div
                     className={`rounded-2xl px-4 py-2 ${
                       msg.senderId === 'current-user'
-                        ? 'bg-gradient-primary text-white'
-                        : 'bg-gray-100 text-gray-900'
+                        ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                        : 'bg-gray-200 text-gray-900'
                     }`}
                   >
-                    <p className="text-xs font-medium mb-1 opacity-80">
+                    <p className={`text-xs font-medium mb-1 ${
+                      msg.senderId === 'current-user' ? 'text-white/90' : 'text-gray-600'
+                    }`}>
                       {msg.senderName}
                     </p>
-                    <p className="text-sm">{msg.text}</p>
+                    <p className={`text-sm ${
+                      msg.senderId === 'current-user' ? 'text-white' : 'text-gray-900'
+                    }`}>{msg.text}</p>
                   </div>
                   <p className="text-xs text-gray-500 mt-1 px-2">
                     {formatTime(msg.timestamp)}

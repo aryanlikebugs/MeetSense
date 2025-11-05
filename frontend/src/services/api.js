@@ -13,8 +13,12 @@ function getAuthHeaders(extra = {}) {
 async function handleResponse(response) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const message = data?.message || 'API error';
-    throw new Error(message);
+    // Include more details in error message for debugging
+    const message = data?.message || data?.error || `API error: ${response.status} ${response.statusText}`;
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
   return data;
 }

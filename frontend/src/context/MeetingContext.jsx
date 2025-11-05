@@ -23,27 +23,51 @@ export const MeetingProvider = ({ children }) => {
   useEffect(() => {
     if (!socket || !activeMeeting?._id) return;
 
+    const getId = (p) => String(p?.userId?._id || p?.userId || p?._id || p?.id);
     const onJoined = (payload) => {
       setParticipants((prev) => {
-        const exists = prev.some(p => String(p.userId || p._id) === String(payload.user?.id || payload.user?._id));
+        const joiningId = String(payload.user?.id || payload.user?._id);
+        if (!joiningId) return prev;
+        const exists = prev.some(p => getId(p) === joiningId);
         if (exists) return prev;
-        return [...prev, { userId: payload.user?.id, name: payload.user?.name }];
+        return [...prev, { 
+          userId: payload.user?.id || payload.user?._id,
+          name: payload.user?.name
+        }];
       });
     };
     const onLeft = ({ userId }) => {
-      setParticipants((prev) => prev.filter(p => String(p.userId || p._id) !== String(userId)));
+      setParticipants((prev) => prev.filter(p => String(p?.userId?._id || p?.userId || p?._id || p?.id) !== String(userId)));
     };
     const onDisconnected = ({ userId }) => {
       // keep but mark inactive (optional)
     };
     const onChat = (msg) => {
-      setChatMessages((prev) => [...prev, {
-        id: `${msg.senderId}-${msg.ts}`,
-        text: msg.text,
-        senderId: String(msg.senderId) === String(user?._id) ? 'current-user' : msg.senderId,
-        senderName: String(msg.senderId) === String(user?._id) ? 'You' : 'Participant',
-        timestamp: msg.ts,
-      }]);
+      const senderIdStr = String(msg.senderId?._id || msg.senderId);
+      const isCurrentUser = senderIdStr === String(user?._id || user?.id);
+      
+      // Try to get sender name from various sources
+      let senderName = 'Participant';
+      if (isCurrentUser) {
+        senderName = 'You';
+      } else if (msg.senderId?.name) {
+        senderName = msg.senderId.name;
+      } else if (msg.senderName) {
+        senderName = msg.senderName;
+      }
+      
+      setChatMessages((prev) => {
+        // Prevent duplicate messages
+        const exists = prev.some(m => m.id === `${senderIdStr}-${msg.ts}`);
+        if (exists) return prev;
+        return [...prev, {
+          id: `${senderIdStr}-${msg.ts}`,
+          text: msg.text,
+          senderId: isCurrentUser ? 'current-user' : senderIdStr,
+          senderName,
+          timestamp: msg.ts,
+        }];
+      });
     };
 
     const onReaction = ({ userId, reaction }) => {
@@ -103,7 +127,12 @@ export const MeetingProvider = ({ children }) => {
         throw new Error('Invalid meeting response');
       }
       setActiveMeeting(meeting);
-      setParticipants(meeting.participants || []);
+      // Normalize participants to a consistent structure to avoid duplicates
+      setParticipants((meeting.participants || []).map(p => ({
+        userId: p?.userId?._id || p?.userId || p?._id || p?.id,
+        name: p?.userId?.name || p?.name,
+        avatar: p?.userId?.avatar || p?.avatar,
+      })));
       return meeting;
     } catch (error) {
       console.error('Create meeting error:', error);
@@ -118,7 +147,12 @@ export const MeetingProvider = ({ children }) => {
         throw new Error('Invalid meeting response');
       }
       setActiveMeeting(res);
-      setParticipants(res.participants || []);
+      // Normalize participants to a consistent structure to avoid duplicates
+      setParticipants((res.participants || []).map(p => ({
+        userId: p?.userId?._id || p?.userId || p?._id || p?.id,
+        name: p?.userId?.name || p?.name,
+        avatar: p?.userId?.avatar || p?.avatar,
+      })));
       if (connectToMeeting) connectToMeeting(meetingId);
       if (socket) socket.emit('join-meeting', { meetingId, user });
       // load past messages
@@ -126,8 +160,20 @@ export const MeetingProvider = ({ children }) => {
         const msgs = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:5000/api') + `/meetings/${meetingId}/messages`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('meetsense_token')}` }
         }).then(r => r.json());
-        setChatMessages(msgs.map(m => ({ id: `${m.senderId}-${m.ts}`, text: m.text, senderId: String(m.senderId) === String(user?._id) ? 'current-user' : m.senderId, senderName: String(m.senderId) === String(user?._id) ? 'You' : 'Participant', timestamp: m.ts })));
-      } catch {}
+        setChatMessages(msgs.map(m => {
+          const senderIdStr = String(m.senderId?._id || m.senderId);
+          const isCurrentUser = senderIdStr === String(user?._id || user?.id);
+          return {
+            id: `${senderIdStr}-${m.ts}`,
+            text: m.text,
+            senderId: isCurrentUser ? 'current-user' : senderIdStr,
+            senderName: isCurrentUser ? 'You' : (m.senderId?.name || 'Participant'),
+            timestamp: m.ts
+          };
+        }));
+      } catch (err) {
+        console.error('Failed to load past messages:', err);
+      }
       return res;
     } catch (error) {
       console.error('Join meeting error:', error);
@@ -136,19 +182,31 @@ export const MeetingProvider = ({ children }) => {
   };
 
   const leaveMeeting = async () => {
-    stopMediaStream();
-    if (activeMeeting?._id) {
-      await meetingService.leaveMeeting(activeMeeting._id);
-      if (socket) socket.emit('leave-meeting', { meetingId: activeMeeting._id });
+    try {
+      stopMediaStream();
+      if (activeMeeting?._id) {
+        // Emit socket leave first, then call API
+        if (socket) {
+          socket.emit('leave-meeting', { meetingId: activeMeeting._id });
+        }
+        // Call API leave endpoint (don't wait if it fails)
+        await meetingService.leaveMeeting(activeMeeting._id).catch(err => {
+          console.error('Leave meeting API error (non-critical):', err);
+        });
+      }
+    } catch (error) {
+      console.error('Leave meeting error:', error);
+    } finally {
+      // Always clear state even if API call fails
+      setActiveMeeting(null);
+      setParticipants([]);
+      setChatMessages([]);
+      setExpressions({});
+      setReactions({});
+      setIsMuted(false);
+      setIsVideoOff(false);
+      setIsScreenSharing(false);
     }
-    setActiveMeeting(null);
-    setParticipants([]);
-    setChatMessages([]);
-    setExpressions({});
-    setReactions({});
-    setIsMuted(false);
-    setIsVideoOff(false);
-    setIsScreenSharing(false);
   };
 
   const toggleMute = async () => {
@@ -239,8 +297,17 @@ export const MeetingProvider = ({ children }) => {
   };
 
   const sendMessage = (message) => {
-    if (!activeMeeting?._id || !socket) return;
-    socket.emit('chat-message', { meetingId: activeMeeting._id, text: message });
+    if (!activeMeeting?._id || !socket || !user) return;
+    socket.emit('chat-message', { 
+      meetingId: activeMeeting._id, 
+      text: message,
+      user: {
+        id: user._id || user.id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar
+      }
+    });
   };
 
   const updateExpression = (participantId, expression) => {
