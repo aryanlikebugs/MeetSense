@@ -66,16 +66,22 @@ const CreateMeeting = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-2xl mx-auto"
       >
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-2xl flex items-center justify-center">
-            <Video size={32} className="text-white" />
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-900/40 shadow-2xl p-6 md:p-8 mb-10 text-center">
+          <div className="absolute inset-0 opacity-50">
+            <div className="absolute -top-10 right-0 h-32 w-32 bg-purple-500/30 blur-[120px]" />
+            <div className="absolute -bottom-14 left-2 h-28 w-28 bg-sky-500/30 blur-[100px]" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Meeting</h1>
-          <p className="text-gray-600">Set up a new video conference with AI-powered analytics</p>
+          <div className="relative">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary-500/30">
+              <Video size={32} className="text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Create New Meeting</h1>
+            <p className="text-slate-200">Set up a new video conference with AI-powered analytics</p>
+          </div>
         </div>
 
         {!generatedMeeting ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-xl shadow-2xl p-6 md:p-8">
             <InputField
               label="Meeting Title"
               placeholder="e.g., Team Standup, Client Presentation"
@@ -86,16 +92,22 @@ const CreateMeeting = () => {
             />
 
             <div className="mt-6 space-y-4">
-              <div className="flex items-center gap-3 text-gray-600">
-                <Clock size={20} />
+              <div className="flex items-center gap-3 text-slate-300">
+                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Clock size={18} className="text-white" />
+                </div>
                 <span>Unlimited duration</span>
               </div>
-              <div className="flex items-center gap-3 text-gray-600">
-                <Users size={20} />
+              <div className="flex items-center gap-3 text-slate-300">
+                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Users size={18} className="text-white" />
+                </div>
                 <span>Unlimited participants</span>
               </div>
-              <div className="flex items-center gap-3 text-gray-600">
-                <Video size={20} />
+              <div className="flex items-center gap-3 text-slate-300">
+                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Video size={18} className="text-white" />
+                </div>
                 <span>HD video quality</span>
               </div>
             </div>
@@ -109,35 +121,35 @@ const CreateMeeting = () => {
             </Button>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-xl shadow-2xl p-6 md:p-8">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                <Check size={32} className="text-green-600" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/40">
+                <Check size={32} className="text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Meeting Created!</h2>
-              <p className="text-gray-600">{generatedMeeting.title}</p>
+              <h2 className="text-2xl font-bold text-white mb-2">Meeting Created!</h2>
+              <p className="text-slate-300">{generatedMeeting.title}</p>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 mb-6">
-              <p className="text-sm text-gray-600 mb-2">Meeting Link</p>
+            <div className="rounded-2xl border border-white/10 bg-white/5/80 p-4 mb-6">
+              <p className="text-sm text-slate-300 mb-2">Meeting Link</p>
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={`${window.location.origin}/meeting/${generatedMeeting.id}`}
                   readOnly
-                  className="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                  className="flex-1 px-4 py-2 rounded-xl bg-slate-950/60 border border-white/10 text-sm text-white"
                 />
                 <Button
                   variant="outline"
                   onClick={handleCopyLink}
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 border-white/30 text-white hover:bg-white/10"
                 >
                   {copied ? <Check size={20} /> : <Copy size={20} />}
                 </Button>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 className="flex-1"
                 onClick={handleStartMeeting}
@@ -147,7 +159,7 @@ const CreateMeeting = () => {
               <Button
                 variant="secondary"
                 onClick={() => navigate('/dashboard')}
-                className="flex-1"
+                className="flex-1 bg-white/10 text-white border-white/30 hover:bg-white/20"
               >
                 Back to Dashboard
               </Button>

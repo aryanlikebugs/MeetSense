@@ -1,0 +1,26 @@
+{
+  "title": "Mira's Machine Story Begins",
+  "summary": "The meeting began with a prompt for a new story. The narrative introduced a character named Mira, a young woman residing in a bustling town. Mira harbors a unique dream: to invent a machine. This machine is intended to address everyday problems within her community. Her goal is to solve these issues in innovative, fun, and unexpected ways. The initial setup of her story has now commenced.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:33",
+      "note": "Story prompt initiated"
+    },
+    {
+      "ts": "00:55",
+      "note": "Mira's dream introduced"
+    },
+    {
+      "ts": "01:03",
+      "note": "Narrative officially begins"
+    }
+  ],
+  "transcript_snippets": [
+    "Tell me a story.",
+    "She wanted to create a machine that helped her town solve everyday problems",
+    "And so her story began."
+  ],
+  "confidence": "high"
+}

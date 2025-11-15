@@ -13,10 +13,10 @@ export const ROUTES = {
 };
 
 export const EXPRESSIONS = [
-  { label: 'Happy', color: '#10b981', emoji: '😊' },
-  { label: 'Neutral', color: '#6b7280', emoji: '😐' },
-  { label: 'Confused', color: '#f59e0b', emoji: '😕' },
-  { label: 'Surprised', color: '#8b5cf6', emoji: '😲' },
+  { label: 'Happy', color: '#22c55e', emoji: '😊' },
+  { label: 'Neutral', color: '#3b82f6', emoji: '😐' },
+  { label: 'Confused', color: '#f97316', emoji: '😕' },
+  { label: 'Surprised', color: '#a855f7', emoji: '😲' },
   { label: 'Bored', color: '#ef4444', emoji: '😴' },
 ];
 

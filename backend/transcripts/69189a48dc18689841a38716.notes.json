@@ -1,0 +1,26 @@
+{
+  "title": "Arien: Inventor of Joyful Gadgets",
+  "summary": "This segment introduces Arien, a talented young inventor hailing from Azure Bay. Arien is known for his unique ability to craft whimsical gadgets. His primary motivation is to spread joy and make everyday life more amusing for everyone. Furthermore, his inventions are designed with the intention of fostering stronger community bonds through small, fun interactions. He aims to bring people closer together with his creative contributions.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:16",
+      "note": "Introduction of Arien, the young inventor."
+    },
+    {
+      "ts": "00:24",
+      "note": "Arien's goal to make life amusing with gadgets."
+    },
+    {
+      "ts": "00:44",
+      "note": "Gadgets aim to bring community closer."
+    }
+  ],
+  "transcript_snippets": [
+    "Arien, the local young inventor, had the warmest one of all.",
+    "turn little ideas into gadgets that make life a bit more amusing.",
+    "small, fun touches to bring a community closer together."
+  ],
+  "confidence": "high"
+}

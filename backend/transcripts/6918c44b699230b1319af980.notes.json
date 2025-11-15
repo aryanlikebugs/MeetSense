@@ -1,0 +1,26 @@
+{
+  "title": "Greetings and Well-being Check",
+  "summary": "The meeting commenced with a friendly exchange of greetings among the participants. They took a moment to inquire about each other's current well-being, setting a positive tone for the discussion. One speaker specifically asked about their appearance, questioning if they looked good. This query was met with a clear and affirmative response, indicating a lighthearted and positive interaction.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:12",
+      "note": "Inquiry about well-being"
+    },
+    {
+      "ts": "00:19",
+      "note": "Question about appearance"
+    },
+    {
+      "ts": "00:26",
+      "note": "Affirmative response"
+    }
+  ],
+  "transcript_snippets": [
+    "How are you?",
+    "Am I looking good?",
+    "Yeah."
+  ],
+  "confidence": "high"
+}

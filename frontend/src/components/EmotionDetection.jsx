@@ -10,7 +10,8 @@ import EmotionTimeline from './EmotionTimeline';
  * to capture frames and analyze emotions
  */
 const EmotionDetection = () => {
-  const { id: meetingId } = useParams();
+  const params = useParams();
+  const routeMeetingId = params.meetingId || params.id;
   const navigate = useNavigate();
   const { localStream, isVideoOff, activeMeeting } = useMeeting();
   
@@ -20,26 +21,29 @@ const EmotionDetection = () => {
   const captureRef = useRef(null);
   const clientRef = useRef(null);
 
+  // Use meetingId from route if present, otherwise fall back to active meeting id
+  const actualMeetingId = routeMeetingId || activeMeeting?._id;
+
   // Initialize emotion client
   useEffect(() => {
-    if (!meetingId) return;
-    
+    if (!actualMeetingId) return;
+
     // Create emotion client for real-time updates
     clientRef.current = new EmotionClient({
       onEmotionEvent: (event) => {
         setLatestPrediction(event);
       }
     });
-    
-    // Join the emotion room
-    clientRef.current.joinMeeting(meetingId);
-    
+
+    // Join the emotion room using the real meeting id
+    clientRef.current.joinMeeting(actualMeetingId);
+
     return () => {
       if (clientRef.current) {
-        clientRef.current.leaveMeeting(meetingId);
+        clientRef.current.leaveMeeting(actualMeetingId);
       }
     };
-  }, [meetingId]);
+  }, [actualMeetingId]);
 
   // Set up video stream
   useEffect(() => {
@@ -48,15 +52,14 @@ const EmotionDetection = () => {
     }
   }, [localStream, isVideoOff]);
 
-  // Initialize emotion capture
+  // Initialize emotion capture when meetingId and local video are ready
   useEffect(() => {
-    if (!videoRef.current || !meetingId) return;
-    
+    if (!actualMeetingId || !videoRef.current) return;
+
     const initCapture = async () => {
       captureRef.current = new EmotionCapture({
-        apiEndpoint: '/api/detect/frame',
         everyNFrames: 30, // Capture every ~1 second at 30fps
-        meetingId: meetingId,
+        meetingId: actualMeetingId,
         videoElement: videoRef.current,
         onCaptureStart: () => console.log('Emotion capture started'),
         onCapture: (result) => {
@@ -64,24 +67,24 @@ const EmotionDetection = () => {
             setLatestPrediction(result.predictions[0]);
           }
         },
-        onError: (err) => console.error('Emotion capture error:', err)
+        onError: (message, error) => console.error('Emotion capture error:', message, error)
       });
-      
+
       await captureRef.current.initialize();
-      
+
       if (isCapturing) {
         captureRef.current.start();
       }
     };
-    
+
     initCapture();
-    
+
     return () => {
       if (captureRef.current) {
         captureRef.current.stop();
       }
     };
-  }, [meetingId, videoRef.current]);
+  }, [actualMeetingId, localStream]);
   
   // Handle capture toggle
   const handleCaptureToggle = () => {
@@ -98,9 +101,6 @@ const EmotionDetection = () => {
     });
   };
   
-  // Get the actual meeting ID from either URL params or active meeting
-  const actualMeetingId = meetingId || activeMeeting?._id;
-
   return (
     <div className="mt-4">
       <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">

@@ -72,15 +72,21 @@ const JoinMeeting = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-2xl mx-auto"
       >
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-2xl flex items-center justify-center">
-            <LogIn size={32} className="text-white" />
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-900/40 shadow-2xl p-6 md:p-8 mb-10 text-center">
+          <div className="absolute inset-0 opacity-50">
+            <div className="absolute -top-10 right-0 h-32 w-32 bg-purple-500/30 blur-[120px]" />
+            <div className="absolute -bottom-14 left-2 h-28 w-28 bg-sky-500/30 blur-[100px]" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Join Meeting</h1>
-          <p className="text-gray-600">Enter the meeting code to join an existing meeting</p>
+          <div className="relative">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary-500/30">
+              <LogIn size={32} className="text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Join Meeting</h1>
+            <p className="text-slate-200">Enter the meeting code to join an existing meeting</p>
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-xl shadow-2xl p-6 md:p-8">
           <form onSubmit={handleJoinMeeting} className="space-y-6">
             <InputField
               label="Meeting Code"
@@ -118,11 +124,11 @@ const JoinMeeting = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-300">
               Don't have a meeting code?{' '}
               <button
                 onClick={() => navigate('/create-meeting')}
-                className="text-primary-600 hover:text-primary-700 font-medium"
+                className="text-sky-400 hover:text-sky-300 font-medium"
               >
                 Create a new meeting
               </button>

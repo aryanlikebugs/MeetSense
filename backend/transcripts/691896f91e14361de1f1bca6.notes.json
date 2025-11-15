@@ -1,0 +1,32 @@
+{
+  "title": "Crafting Aryan's Story: Community Impact",
+  "summary": "The speakers decided to craft a story featuring a young inventor named Aryan. Aryan is known for creating quirky gadgets and making cheerful introductions. The story's primary aim is to illustrate how small, creative ideas can bring joy. Ultimately, these ideas are intended to brighten and positively impact a community.",
+  "decisions": [
+    {
+      "decision": "To craft a story with a neat introduction and clear aim.",
+      "by": "TBD",
+      "timestamp": "00:20"
+    }
+  ],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:11",
+      "note": "Discussion about story introduction"
+    },
+    {
+      "ts": "00:20",
+      "note": "Decision to craft a story with a clear aim"
+    },
+    {
+      "ts": "00:39",
+      "note": "Clarification of story's aim"
+    }
+  ],
+  "transcript_snippets": [
+    "introduction and give me",
+    "Absolutely. Let's craft a little story with a nice neat intro and a clear aim.",
+    "The aim of Ariane's story is to show how small, creative ideas can brighten up a community."
+  ],
+  "confidence": "high"
+}

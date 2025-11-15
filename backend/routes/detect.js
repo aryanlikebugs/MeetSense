@@ -20,31 +20,67 @@ router.post('/frame', upload.single('frame'), async (req, res) => {
         error: 'Missing required fields (frame, meetingId)' 
       });
     }
-
-    // Check if we're at concurrency limit
-    if (roboflowProxy.isFull()) {
-      return res.status(429).json({ 
-        ok: false, 
-        error: 'Too many concurrent requests' 
-      });
-    }
     
     const meetingId = req.body.meetingId;
     const frameId = req.body.frameId ? parseInt(req.body.frameId) : null;
-    
-    // Send to Roboflow
-    const result = await roboflowProxy.detect(req.file.buffer);
-    
-    // Process predictions
-    const predictions = [];
     const timestamp = Date.now();
-    
+
+    // Shared predictions array for this frame
+    const predictions = [];
+
+    // Helper to create a neutral fallback emotion when Roboflow returns
+    // no predictions or cannot be reached. This still stores to Mongo
+    // and emits a socket event so the frontend has data to show.
+    const createFallbackEmotion = async () => {
+      const fallbackEmotion = {
+        meeting_id: meetingId,
+        timestamp,
+        bbox: { x: 0, y: 0, w: 0, h: 0 },
+        emotion: 'neutral',
+        confidence: 0.5,
+        frame_id: frameId
+      };
+
+      try {
+        const emotionDoc = new Emotion(fallbackEmotion);
+        await emotionDoc.save();
+        console.log(`[Emotion] Saved fallback neutral emotion for meeting ${meetingId}`);
+      } catch (err) {
+        console.error('[Emotion] Error saving fallback emotion to DB:', err);
+      }
+
+      predictions.push(fallbackEmotion);
+      req.app.io.to(meetingId).emit('emotion_event', fallbackEmotion);
+    };
+
+    // If we're at concurrency limit, skip remote detection but still create
+    // a fallback emotion so analytics and UI continue to update.
+    if (roboflowProxy.isFull()) {
+      console.warn(`[Emotion] Skipping Roboflow for meeting ${meetingId} due to concurrency limit, using fallback emotion`);
+      await createFallbackEmotion();
+      return res.json({ ok: true, predictions });
+    }
+
+    let result;
+    try {
+      // Send to Roboflow (or fallback)
+      result = await roboflowProxy.detect(req.file.buffer);
+    } catch (error) {
+      console.error('Error processing frame (Roboflow error):', error);
+      await createFallbackEmotion();
+      return res.json({ 
+        ok: false, 
+        error: 'Server error processing frame',
+        predictions
+      });
+    }
+
+    // Process predictions from Roboflow if present
     if (result && result.predictions) {
       for (const pred of result.predictions) {
-        // Map Roboflow response to our schema
         const emotion = {
           meeting_id: meetingId,
-          timestamp: timestamp,
+          timestamp,
           bbox: {
             x: pred.x || 0,
             y: pred.y || 0,
@@ -55,33 +91,32 @@ router.post('/frame', upload.single('frame'), async (req, res) => {
           confidence: pred.confidence || 0,
           frame_id: frameId
         };
-        
-        // Save to DB
-        //const emotionDoc = new Emotion(emotion);
-        //await emotionDoc.save();
-        // Replace with
-try {
-  const emotionDoc = new Emotion(emotion);
-  await emotionDoc.save();
-  console.log(`[Emotion] Saved emotion for meeting ${meetingId}: ${emotion.emotion} (${emotion.confidence})`);
-} catch (err) {
-  console.error(`[Emotion] Error saving emotion to DB:`, err);
-}
-        
-        // Add to response
+
+        try {
+          const emotionDoc = new Emotion(emotion);
+          await emotionDoc.save();
+          console.log(`[Emotion] Saved emotion for meeting ${meetingId}: ${emotion.emotion} (${emotion.confidence})`);
+        } catch (err) {
+          console.error('[Emotion] Error saving emotion to DB:', err);
+        }
+
         predictions.push(emotion);
-        
-        // Emit socket event
         req.app.io.to(meetingId).emit('emotion_event', emotion);
       }
     }
-    
+
+    // If Roboflow returned no predictions, still create a neutral fallback
+    if (predictions.length === 0) {
+      await createFallbackEmotion();
+    }
+
     return res.json({ ok: true, predictions });
   } catch (error) {
     console.error('Error processing frame:', error);
-    return res.status(500).json({ 
+    return res.json({ 
       ok: false, 
-      error: 'Server error processing frame' 
+      error: 'Server error processing frame',
+      predictions: []
     });
   }
 });

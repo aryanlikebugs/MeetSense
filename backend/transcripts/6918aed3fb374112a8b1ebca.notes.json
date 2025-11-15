@@ -1,0 +1,32 @@
+{
+  "title": "Beginning of Mira's Village Story",
+  "summary": "The meeting transitioned from technical discussions, including terms like 'status code' and 'next playlist'. A request was made to shift focus and 'tell a story of a village'. The narrative introduced a character named Mira, whose unique and quirky invention is set to lead to new and unexpected adventures with every problem it solves.",
+  "decisions": [
+    {
+      "decision": "To tell a story about a village",
+      "by": "TBD",
+      "timestamp": "00:54"
+    }
+  ],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:39",
+      "note": "Discussion of 'Next playlist'"
+    },
+    {
+      "ts": "00:54",
+      "note": "Request to 'Tell a story'"
+    },
+    {
+      "ts": "01:04",
+      "note": "Introduction of Mira's quirky invention"
+    }
+  ],
+  "transcript_snippets": [
+    "Next playlist.",
+    "Tell a story",
+    "as Mira started building her quirky invention"
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Village's Belief in Story Magic",
+  "summary": "The initial segment of the transcript introduces a distinctive village. Within this community, the inhabitants shared a profound conviction. They believed that stories were not just narratives but possessed a tangible, real magic. This foundational concept sets the stage for the unfolding narrative.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:10",
+      "note": "Introduction of the little village"
+    },
+    {
+      "ts": "00:11",
+      "note": "Universal belief among villagers"
+    },
+    {
+      "ts": "00:13",
+      "note": "Stories held real magic"
+    }
+  ],
+  "transcript_snippets": [
+    "there was this little village",
+    "Everyone believed.",
+    "That stories held a bit of real magic."
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Initial Statement Observation",
+  "summary": "The meeting notes indicate an early observation regarding a speaker's utterance. Specifically, a speaker initiated a statement using the word 'Like'. This event was recorded at the 00:20 timestamp. The provided information does not elaborate on the context or the subsequent content of this statement.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:20",
+      "note": "Speaker began statement with 'Like'"
+    }
+  ],
+  "transcript_snippets": [
+    "Like,"
+  ],
+  "confidence": "low"
+}

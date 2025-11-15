@@ -48,18 +48,26 @@ const Settings = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto"
       >
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-600">Manage your account and preferences</p>
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-900/40 shadow-2xl p-6 md:p-8 mb-10">
+          <div className="absolute inset-0 opacity-50">
+            <div className="absolute -top-10 -right-10 h-40 w-40 bg-purple-500/30 blur-[120px]" />
+            <div className="absolute -bottom-16 -left-6 h-36 w-36 bg-sky-500/30 blur-[100px]" />
+          </div>
+          <div className="relative">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Settings</h1>
+            <p className="text-slate-300 max-w-2xl">
+              Manage your account, profile, and meeting preferences to personalize your MeetSense experience.
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="space-y-8">
+          <div className="rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-xl shadow-2xl p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center">
                 <User size={20} className="text-white" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
+              <h2 className="text-xl font-bold text-white">Profile Information</h2>
             </div>
 
             <form onSubmit={handleSaveProfile} className="space-y-6">
@@ -88,22 +96,22 @@ const Settings = () => {
             </form>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-6">
+          <div className="rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-xl shadow-2xl p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center">
                 <Video size={20} className="text-white" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Meeting Preferences</h2>
+              <h2 className="text-xl font-bold text-white">Meeting Preferences</h2>
             </div>
 
             <form onSubmit={handleSavePreferences} className="space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between p-4 rounded-2xl border border-white/10 bg-white/5/80">
                   <div className="flex items-center gap-3">
-                    <Bell size={20} className="text-gray-600" />
+                    <Bell size={20} className="text-slate-200" />
                     <div>
-                      <p className="font-medium text-gray-900">Notifications</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-medium text-white">Notifications</p>
+                      <p className="text-sm text-slate-300">
                         Receive meeting reminders and updates
                       </p>
                     </div>
@@ -112,7 +120,7 @@ const Settings = () => {
                     type="button"
                     onClick={() => handlePreferenceChange('notifications')}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.notifications ? 'bg-primary-600' : 'bg-gray-300'
+                      preferences.notifications ? 'bg-sky-500' : 'bg-white/20'
                     }`}
                   >
                     <div
@@ -123,12 +131,12 @@ const Settings = () => {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between p-4 rounded-2xl border border-white/10 bg-white/5/80">
                   <div className="flex items-center gap-3">
-                    <Video size={20} className="text-gray-600" />
+                    <Video size={20} className="text-slate-200" />
                     <div>
-                      <p className="font-medium text-gray-900">Auto Recording</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-medium text-white">Auto Recording</p>
+                      <p className="text-sm text-slate-300">
                         Automatically record all meetings
                       </p>
                     </div>
@@ -137,7 +145,7 @@ const Settings = () => {
                     type="button"
                     onClick={() => handlePreferenceChange('autoRecording')}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.autoRecording ? 'bg-primary-600' : 'bg-gray-300'
+                      preferences.autoRecording ? 'bg-sky-500' : 'bg-white/20'
                     }`}
                   >
                     <div
@@ -148,12 +156,12 @@ const Settings = () => {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between p-4 rounded-2xl border border-white/10 bg-white/5/80">
                   <div className="flex items-center gap-3">
-                    <Shield size={20} className="text-gray-600" />
+                    <Shield size={20} className="text-slate-200" />
                     <div>
-                      <p className="font-medium text-gray-900">Expression Tracking</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-medium text-white">Expression Tracking</p>
+                      <p className="text-sm text-slate-300">
                         Enable AI-based face expression analysis
                       </p>
                     </div>
@@ -162,7 +170,7 @@ const Settings = () => {
                     type="button"
                     onClick={() => handlePreferenceChange('expressionTracking')}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.expressionTracking ? 'bg-primary-600' : 'bg-gray-300'
+                      preferences.expressionTracking ? 'bg-sky-500' : 'bg-white/20'
                     }`}
                   >
                     <div

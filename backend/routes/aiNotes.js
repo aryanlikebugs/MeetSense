@@ -7,11 +7,16 @@ import AINote from '../models/AINote.js';
 import mongoose from 'mongoose';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Google GenAI modern SDK
 import { GoogleGenAI } from '@google/genai';
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const TRANSCRIPTS_DIR = path.resolve(__dirname, '../transcripts');
 
 /* ---------- CONFIG ---------- */
 const API_KEY = process.env.AI_API_KEY;
@@ -34,8 +39,7 @@ function msToTimestamp(ms) {
 }
 
 async function loadTranscriptFromFile(meetingId) {
-  const transcriptsDir = path.resolve(process.cwd(), 'backend', 'transcripts');
-  const p = path.join(transcriptsDir, `${meetingId}.json`);
+  const p = path.join(TRANSCRIPTS_DIR, `${meetingId}.json`);
   console.log(`[AI NOTES] Loading transcript from: ${p}`);
   const raw = await fs.readFile(p, 'utf8');
   return JSON.parse(raw);
@@ -238,19 +242,24 @@ router.post('/meetings/:meetingId/generate-notes', async (req, res) => {
 
     // Helper to call GenAI and return raw string (not an express response)
     async function callGenRawText(promptText, generationConfig = {}) {
-      const requestBody = {
-        model: AI_MODEL_NAME,
-        contents: [ { parts: [{ text: promptText }] } ],
-        config: generationConfig
-      };
-      const response = await aiClient.models.generateContent(requestBody);
-      const text = extractTextFromGenAIResponse(response);
-      if (!text) {
-        console.warn('[AI NOTES] Unexpected response shape when generating raw text.');
-        console.warn(JSON.stringify(response).slice(0, 2000));
-        throw new Error('Unexpected response shape from GenAI when generating text');
+      try {
+        const requestBody = {
+          model: AI_MODEL_NAME,
+          contents: [ { parts: [{ text: promptText }] } ],
+          config: generationConfig
+        };
+        const response = await aiClient.models.generateContent(requestBody);
+        const text = extractTextFromGenAIResponse(response);
+        if (!text) {
+          console.warn('[AI NOTES] Unexpected response shape when generating raw text.');
+          console.warn(JSON.stringify(response).slice(0, 2000));
+          throw new Error('Unexpected response shape from GenAI when generating text');
+        }
+        return text;
+      } catch (error) {
+        console.error('[AI NOTES] GenAI text generation failed:', error);
+        throw new Error(`GenAI text generation failed: ${error.message || String(error)}`);
       }
-      return text;
     }
 
     const chunkSummaries = [];
@@ -271,9 +280,8 @@ router.post('/meetings/:meetingId/generate-notes', async (req, res) => {
     const finalNotes = parseJsonTolerant(synthRaw);
 
     // Save to filesystem
-    const outDir = path.resolve(process.cwd(), 'backend', 'transcripts');
-    await fs.mkdir(outDir, { recursive: true });
-    const outPath = path.join(outDir, `${meetingId}.notes.json`);
+    await fs.mkdir(TRANSCRIPTS_DIR, { recursive: true });
+    const outPath = path.join(TRANSCRIPTS_DIR, `${meetingId}.notes.json`);
     await fs.writeFile(outPath, JSON.stringify(finalNotes, null, 2), 'utf8');
 
     // Save structured note to MongoDB

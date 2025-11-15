@@ -1,0 +1,27 @@
+{
+  "title": "Quantum Entanglement: Definition & Implications",
+  "summary": "This segment defines quantum entanglement as a phenomenon where interconnected particles instantly influence each other's states, regardless of distance. This concept is a fundamental aspect of quantum mechanics. It holds significant implications for the advancement of quantum computing. Furthermore, it is crucial for developments in quantum cryptography.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:28",
+      "note": "Definition of quantum entanglement"
+    },
+    {
+      "ts": "00:39",
+      "note": "Influence regardless of distance"
+    },
+    {
+      "ts": "00:56",
+      "note": "Implications for quantum computing and cryptography"
+    }
+  ],
+  "transcript_snippets": [
+    "In the realm of quantum physics, entanglement is a phenomenon where pairs or groups of particles become interconnected...",
+    "No matter how far apart they are.",
+    "It's one of the cornerstone of quantum mechanics.",
+    "And has huge implications for fields like quantum computing and cryptography."
+  ],
+  "confidence": "high"
+}

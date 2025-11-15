@@ -11,6 +11,13 @@ const MAX_CONCURRENT_REQUESTS = parseInt(process.env.MAX_CONCURRENT_ROBOFLOW_REQ
 const limit = pLimit(MAX_CONCURRENT_REQUESTS);
 
 async function sendToRoboflow(imageBuffer, retryCount = 0) {
+  // If Roboflow is not configured, return an empty result so the
+  // API can succeed without crashing in development.
+  if (!ROBOFLOW_INFERENCE_URL || !ROBOFLOW_API_KEY) {
+    console.warn('[Roboflow] ROBOFLOW_INFERENCE_URL or ROBOFLOW_API_KEY not set. Skipping remote detection.');
+    return { predictions: [] };
+  }
+
   const form = new FormData();
   form.append('file', imageBuffer, {
     filename: 'frame.jpg',

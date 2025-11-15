@@ -3,6 +3,8 @@ import { Calendar, Clock, Users, TrendingUp } from 'lucide-react';
 import { formatDateTime, formatDuration } from '../utils/formatDate';
 
 const MeetingTile = ({ meeting, onClick }) => {
+  const durationSeconds = Math.max(0, Math.round((meeting.duration || 0) / 1000));
+
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -5 }}
@@ -21,7 +23,7 @@ const MeetingTile = ({ meeting, onClick }) => {
 
           <div className="flex items-center gap-2 text-gray-600">
             <Clock size={16} />
-            <span className="text-sm">{formatDuration(meeting.duration || 0)}</span>
+            <span className="text-sm">{formatDuration(durationSeconds)}</span>
           </div>
 
           <div className="flex items-center gap-2 text-gray-600">

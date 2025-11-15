@@ -1,0 +1,21 @@
+{
+  "title": "Brief Exchange Summary",
+  "summary": "The speakers provided brief, one-word responses.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "02:23",
+      "note": "Yeah."
+    },
+    {
+      "ts": "02:33",
+      "note": "No."
+    }
+  ],
+  "transcript_snippets": [
+    "Yeah.",
+    "No."
+  ],
+  "confidence": "low"
+}

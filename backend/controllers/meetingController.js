@@ -2,8 +2,13 @@
 import Meeting from '../models/Meeting.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import Transcript from '../models/Transcript.js';
 import { closeAsrForMeeting } from '../transcriber/adapter.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const TRANSCRIPTS_DIR = path.resolve(__dirname, '../transcripts');
 
 // POST /api/meetings/create
 export const createMeeting = async (req, res, next) => {
@@ -121,9 +126,8 @@ export const endMeeting = async (req, res, next) => {
     // Fetch the transcript from the database
     const transcriptDoc = await Transcript.findOne({ meetingId: meeting._id });
     if (transcriptDoc) {
-      const transcriptsDir = path.resolve(process.cwd(), 'backend', 'transcripts');
-      await fs.mkdir(transcriptsDir, { recursive: true });
-      const transcriptPath = path.join(transcriptsDir, `${meeting._id}.json`);
+      await fs.mkdir(TRANSCRIPTS_DIR, { recursive: true });
+      const transcriptPath = path.join(TRANSCRIPTS_DIR, `${meeting._id}.json`);
       await fs.writeFile(transcriptPath, JSON.stringify(transcriptDoc.lines), 'utf8');
       console.log(`[endMeeting] Transcript saved to ${transcriptPath}`);
     } else {

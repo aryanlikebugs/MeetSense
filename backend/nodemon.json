@@ -1,0 +1,19 @@
+{
+  "watch": [
+    "server.js",
+    "app.js",
+    "config",
+    "controllers",
+    "routes",
+    "models",
+    "middleware",
+    "sockets",
+    "transcriber"
+  ],
+  "ext": "js,mjs,cjs",
+  "ignore": [
+    "**/transcripts/**",
+    "**/*.notes.json",
+    "**/*.log"
+  ]
+}

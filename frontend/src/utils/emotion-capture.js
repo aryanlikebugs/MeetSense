@@ -79,11 +79,31 @@ class EmotionCapture {
     const canvas = this.canvas;
     const ctx = this.ctx;
     
+    // Ensure video is ready
+    if (!video || video.readyState < 2) {
+      return;
+    }
+
+    // Ensure canvas has valid dimensions
+    if (!canvas.width || !canvas.height) {
+      canvas.width = video.videoWidth || canvas.width;
+      canvas.height = video.videoHeight || canvas.height;
+      if (!canvas.width || !canvas.height) {
+        this.options.onError('Capture skipped: canvas has zero size');
+        return;
+      }
+    }
+
     // Draw video frame to canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
     // Convert to blob and send
     canvas.toBlob(async (blob) => {
+      if (!blob) {
+        this.options.onError('Canvas did not produce a valid image blob');
+        return;
+      }
+
       try {
         const form = new FormData();
         form.append('frame', blob, 'frame.jpg');
@@ -92,8 +112,7 @@ class EmotionCapture {
         
         const response = await fetch(this.options.apiEndpoint, {
           method: 'POST',
-          body: form,
-          keepalive: true
+          body: form
         });
         
         if (response.ok) {
