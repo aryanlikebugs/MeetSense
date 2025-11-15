@@ -25,6 +25,10 @@ export const meetingService = {
     return apiClient.post(`/meetings/${meetingId}/end`, {});
   },
 
+  async generateNotes(meetingId) {
+    return apiClient.post(`/meetings/${meetingId}/generate-notes`, {});
+  },
+
   // Placeholders for future backend features
   async sendMessage() {
     throw new Error('sendMessage not implemented on backend');

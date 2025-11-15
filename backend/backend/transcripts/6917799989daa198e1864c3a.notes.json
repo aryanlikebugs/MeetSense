@@ -1,0 +1,26 @@
+{
+  "title": "Transcript Link & AI Verification",
+  "summary": "The meeting focused on verifying the functionality of the transcript link feature and confirming the proper operation of the AI model. Participants checked if the transcript file was being stored correctly and whether the AI model was functioning as expected. The verification process concluded with the determination that the AI model is indeed working correctly. The transcript link feature also appears to be operational based on initial checks.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:10",
+      "note": "Transcript link feature is working"
+    },
+    {
+      "ts": "00:24",
+      "note": "AI model is working or not"
+    },
+    {
+      "ts": "00:36",
+      "note": "The model is working"
+    }
+  ],
+  "transcript_snippets": [
+    "transcript link feature is working",
+    "AI model is working or not",
+    "The model is working"
+  ],
+  "confidence": "high"
+}

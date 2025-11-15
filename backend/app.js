@@ -2,6 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import './config/env.js';
+import aiNotesRouter from './routes/aiNotes.js';
+import importNotesRouter from './routes/importNotes.js';
+
+// Import emotion detection routes
+import detectRoutes from './routes/detect.js';
+import emotionAnalyticsRoutes from './analytics.js';
 
 import authRoutes from './routes/authRoutes.js';
 import meetingRoutes from './routes/meetingRoutes.js';
@@ -33,8 +39,14 @@ app.use('/api/users', userRoutes);
 // Test route base
 app.use('/api', testRoute);
 
-// Placeholder: future integration for /ai Python microservice
-// app.use('/ai', ...);
+// AI Notes routes
+app.use('/api', aiNotesRouter);
+app.use('/api', importNotesRouter);
+
+// Emotion detection routes
+app.use('/api/detect', detectRoutes);
+app.use('/api/emotion-analytics', emotionAnalyticsRoutes);
+
 
 app.use(notFound);
 app.use(errorHandler);

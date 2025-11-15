@@ -1,0 +1,26 @@
+{
+  "title": "Lila's Mechanical Seagull Story",
+  "summary": "A speaker shared a story about Lila, a young inventor residing in a coastal town. Lila ingeniously created a mechanical seagull capable of flying messages. This invention effectively connected the entire town, from one end all the way to the lighthouse. Her creation introduced a unique touch of everyday magic, fostering a stronger sense of community among the townspeople.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:13",
+      "note": "Meeting begins"
+    },
+    {
+      "ts": "00:25",
+      "note": "Lila invents mechanical seagull"
+    },
+    {
+      "ts": "00:31",
+      "note": "Seagull brings town together"
+    }
+  ],
+  "transcript_snippets": [
+    "Let's dive right in.",
+    "One day, she distilled a mechanical seagull that could fly messages",
+    "And that's how a little bit of everyday magic started bringing the town together."
+  ],
+  "confidence": "high"
+}

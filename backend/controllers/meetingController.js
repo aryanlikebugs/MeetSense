@@ -1,5 +1,9 @@
 // Frontend: src/services/meetingService.js
 import Meeting from '../models/Meeting.js';
+import fs from 'fs/promises';
+import path from 'path';
+import Transcript from '../models/Transcript.js';
+import { closeAsrForMeeting } from '../transcriber/adapter.js';
 
 // POST /api/meetings/create
 export const createMeeting = async (req, res, next) => {
@@ -104,8 +108,28 @@ export const endMeeting = async (req, res, next) => {
     const meeting = await Meeting.findById(req.params.id);
     if (!meeting) return res.status(404).json({ message: 'Meeting not found' });
     if (String(meeting.host) !== String(req.user.id)) return res.status(403).json({ message: 'Only host can end meeting' });
+    
     meeting.endedAt = new Date();
     await meeting.save();
+
+    // Close the ASR connection for this meeting
+    await closeAsrForMeeting(meeting._id.toString());
+
+    // Wait for 1 second to allow any final transcripts to be saved to the database
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Fetch the transcript from the database
+    const transcriptDoc = await Transcript.findOne({ meetingId: meeting._id });
+    if (transcriptDoc) {
+      const transcriptsDir = path.resolve(process.cwd(), 'backend', 'transcripts');
+      await fs.mkdir(transcriptsDir, { recursive: true });
+      const transcriptPath = path.join(transcriptsDir, `${meeting._id}.json`);
+      await fs.writeFile(transcriptPath, JSON.stringify(transcriptDoc.lines), 'utf8');
+      console.log(`[endMeeting] Transcript saved to ${transcriptPath}`);
+    } else {
+      console.log(`[endMeeting] No transcript found for meeting ${meeting._id}`);
+    }
+
     res.json({ message: 'Meeting ended' });
   } catch (err) { next(err); }
 };

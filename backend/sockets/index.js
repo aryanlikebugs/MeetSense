@@ -2,6 +2,12 @@ import { Server as SocketIOServer } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import Meeting from '../models/Meeting.js';
 import User from '../models/User.js';
+import Transcript from '../models/Transcript.js';
+import {
+  ensureLiveStream,
+  sendAudio,
+  closeLiveStream
+} from '../transcriber/dgSdkBridge.js';
 
 const getOrigin = () => process.env.CLIENT_URL || process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -30,11 +36,28 @@ export function initSocket(server) {
     console.log('Socket connected', socket.id, 'user', socket.user?.id);
     let roomId = null;
     let disconnectAt = null;
+    
+    // Join emotion detection room
+    socket.on('join', (meetingId) => {
+      console.log(`[Socket] User joined emotion room: ${socket.id} for meeting ${meetingId}`);
+      socket.join(meetingId);
+    });
 
     socket.on('join-meeting', async ({ meetingId, user }) => {
       try {
         roomId = meetingId;
         socket.join(meetingId);
+        console.log('[Socket] join-meeting', meetingId);
+
+        // Ensure transcript doc exists
+        await Transcript.updateOne(
+          { meetingId },
+          { $setOnInsert: { lines: [] } },
+          { upsert: true }
+        );
+
+        // Prepare SDK live stream
+        ensureLiveStream(meetingId, io);
         
         // Fetch user info from database if not provided
         let userInfo = user;
@@ -171,6 +194,19 @@ export function initSocket(server) {
     socket.on('reaction', ({ meetingId, reaction }) => {
       io.to(meetingId).emit('reaction', { userId: socket.user.id, reaction });
       console.log(`User ${socket.user.id} reacted with ${reaction} in meeting ${meetingId}`);
+    });
+
+    socket.on('audio-chunk', async (payload) => {
+      const size = payload?.blob?.length || 0;
+      console.log('[Socket] audio-chunk', payload?.meetingId, size);
+      ensureLiveStream(payload.meetingId, io);
+      sendAudio(payload.meetingId, payload.blob);
+    });
+
+    socket.on('end-meeting', async ({ meetingId }) => {
+      console.log('[Socket] end-meeting', meetingId);
+      closeLiveStream(meetingId);
+      io.to(meetingId).emit('transcript-finalized', { meetingId });
     });
 
     socket.on('disconnect', async () => {

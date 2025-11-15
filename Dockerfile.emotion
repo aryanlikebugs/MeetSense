@@ -1,0 +1,17 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY backend/package*.json ./
+RUN npm install
+
+# Copy emotion-specific requirements
+COPY backend/emotion-requirements.json ./
+RUN npm install --package-lock-only --ignore-scripts
+RUN npm install
+
+COPY backend ./
+
+EXPOSE 5000
+
+CMD ["node", "server.js"]

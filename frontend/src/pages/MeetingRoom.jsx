@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 import MeetingLayout from '../layouts/MeetingLayout';
 import ParticipantCard from '../components/ParticipantCard';
 import ChatBox from '../components/ChatBox';
+import TranscriptPanel from '../components/TranscriptPanel';
 import ControlBar from '../components/ControlBar';
 import Button from '../components/Button';
 import { useMeeting } from '../hooks/useMeeting';
 import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../hooks/useNotifications';
+import EmotionDetection from '../components/EmotionDetection';
 
 const MeetingRoom = () => {
   const { meetingId } = useParams();
@@ -18,6 +21,7 @@ const MeetingRoom = () => {
   const { showInfo, showError } = useNotifications();
   const [joined, setJoined] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [joinError, setJoinError] = useState(null);
 
   useEffect(() => {
@@ -93,6 +97,7 @@ const MeetingRoom = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <EmotionDetection />
             <AnimatePresence>
               {user && (
                 <ParticipantCard
@@ -140,8 +145,37 @@ const MeetingRoom = () => {
         </div>
       </div>
 
+      <AnimatePresence>
+        {transcriptOpen && (
+          <motion.div
+            initial={{ x: -400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -400, opacity: 0 }}
+            className="fixed left-0 top-0 bottom-0 w-96 bg-gray-900 shadow-2xl z-40 flex flex-col"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600">
+              <h3 className="text-lg font-bold text-white">Live Transcript</h3>
+              <button
+                onClick={() => setTranscriptOpen(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X size={20} className="text-white" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <TranscriptPanel />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <ChatBox isOpen={chatOpen} onClose={() => setChatOpen(false)} />
-      <ControlBar onChatToggle={() => setChatOpen(prev => !prev)} isHost={isHost} onLeaveMeeting={handleLeaveMeeting} />
+      <ControlBar 
+        onChatToggle={() => setChatOpen(prev => !prev)} 
+        onTranscriptToggle={() => setTranscriptOpen(prev => !prev)}
+        isHost={isHost} 
+        onLeaveMeeting={handleLeaveMeeting} 
+      />
     </MeetingLayout>
   );
 };

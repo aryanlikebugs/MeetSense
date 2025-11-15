@@ -1,0 +1,26 @@
+{
+  "title": "AI Summary Functionality Testing",
+  "summary": "The meeting began with a discussion about testing functionality and generating reports from project audio. A key question was raised regarding how to effectively check the summary functionality of an AI system. The response explained that testing involves feeding the AI system various texts, such as articles or transcripts. The generated summary should then be compared against the original content's key points to assess its accuracy. An offer was also extended to provide assistance for testing with a specific piece of text.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:23",
+      "note": "Mention of project microphone functionality."
+    },
+    {
+      "ts": "00:40",
+      "note": "Question about checking AI summary functionality."
+    },
+    {
+      "ts": "00:58",
+      "note": "Explanation of how to compare AI summaries to original text."
+    }
+  ],
+  "transcript_snippets": [
+    "microphone of this project.",
+    "check the summary functionality of an AI system.",
+    "compare the summary to the key points of the original text"
+  ],
+  "confidence": "high"
+}

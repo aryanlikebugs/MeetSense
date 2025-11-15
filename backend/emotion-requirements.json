@@ -1,0 +1,11 @@
+{
+  "name": "meetsense-emotion-detection",
+  "version": "1.0.0",
+  "description": "Emotion detection service for MeetSense using Roboflow",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "form-data": "^4.0.0",
+    "multer": "^1.4.5-lts.1",
+    "p-limit": "^4.0.0"
+  }
+}

@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useRef } from 'react';
 import { meetingService } from '../services/meetingService';
 import { useAuth } from '../hooks/useAuth';
 import { useSocket } from './SocketContext';
@@ -19,6 +19,9 @@ export const MeetingProvider = ({ children }) => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState({});
   const [reactions, setReactions] = useState({});
+  const [transcript, setTranscript] = useState([]);
+  const [asrReady, setAsrReady] = useState(false);
+  const mrRef = useRef(null);
 
   useEffect(() => {
     if (!socket || !activeMeeting?._id) return;
@@ -89,6 +92,8 @@ export const MeetingProvider = ({ children }) => {
     socket.on('meeting-ended', () => {
       setActiveMeeting(null);
       setParticipants([]);
+      setTranscript([]);
+      setAsrReady(false);
       stopMediaStream();
     });
 
@@ -111,7 +116,13 @@ export const MeetingProvider = ({ children }) => {
 
   const startMediaStream = async (video = true, audio = true) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video, audio });
+      // Always capture mic if audio=true
+      const constraints = {
+        video,
+        audio: audio ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true } : false
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('[client] startMediaStream: audioTracks=', stream.getAudioTracks().length, 'videoTracks=', stream.getVideoTracks().length);
       setLocalStream(stream);
       return stream;
     } catch (error) {
@@ -188,6 +199,7 @@ export const MeetingProvider = ({ children }) => {
         // Emit socket leave first, then call API
         if (socket) {
           socket.emit('leave-meeting', { meetingId: activeMeeting._id });
+          socket.emit('end-meeting', { meetingId: activeMeeting._id });
         }
         // Call API leave endpoint (don't wait if it fails)
         await meetingService.leaveMeeting(activeMeeting._id).catch(err => {
@@ -203,6 +215,8 @@ export const MeetingProvider = ({ children }) => {
       setChatMessages([]);
       setExpressions({});
       setReactions({});
+      setTranscript([]);
+      setAsrReady(false);
       setIsMuted(false);
       setIsVideoOff(false);
       setIsScreenSharing(false);
@@ -246,7 +260,7 @@ export const MeetingProvider = ({ children }) => {
       });
     } else if (!newVideoOff) {
       try {
-        const stream = await startMediaStream(true, isMuted);
+        const stream = await startMediaStream(true, true); // always request mic; we'll mute via track.enabled
         if (stream) {
           if (socket && activeMeeting?._id) {
             socket.emit('toggle-camera', { meetingId: activeMeeting._id, on: !newVideoOff });
@@ -269,10 +283,23 @@ export const MeetingProvider = ({ children }) => {
       setIsScreenSharing(false);
     } else {
       try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        setLocalStream(stream);
+        const display = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }); // display audio is unreliable
+        // Ensure we also have a mic track
+        const mic = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+
+        const combined = new MediaStream([
+          ...display.getVideoTracks(),
+          ...mic.getAudioTracks()
+        ]);
+
+        console.log('[client] screen share: display video=', display.getVideoTracks().length, 'display audio=', display.getAudioTracks().length, 'mic=', mic.getAudioTracks().length);
+        setLocalStream(combined);
         setIsScreenSharing(true);
-        stream.getVideoTracks()[0].addEventListener('ended', () => {
+
+        // When user stops screen share
+        display.getVideoTracks()[0].addEventListener('ended', () => {
           setIsScreenSharing(false);
           stopMediaStream();
         });
@@ -323,6 +350,81 @@ export const MeetingProvider = ({ children }) => {
     }
   }, [activeMeeting?._id]);
 
+  // Listen for ASR readiness
+  useEffect(() => {
+    if (!socket || !activeMeeting?._id) return;
+
+    const onReady = (payload) => {
+      console.log('[client] asr-ready for', payload);
+      // Be lenient in comparison (ObjectId vs string)
+      if (!payload?.meetingId) return;
+      if (String(payload.meetingId) !== String(activeMeeting._id)) return;
+      // stop any existing recorder so we will recreate a fresh one
+      try { if (mrRef.current && mrRef.current.state !== 'inactive') mrRef.current.stop(); } catch {}
+      setAsrReady(true);
+    };
+
+    socket.on('asr-ready', onReady);
+
+    return () => {
+      socket.off('asr-ready', onReady);
+      setAsrReady(false); // Reset when leaving meeting
+    };
+  }, [socket, activeMeeting?._id]);
+
+  // We no longer use a fallback - we MUST wait for 'asr-ready' from the server
+  // to ensure we send the WebM header as the first chunk
+
+  // MediaRecorder for transcript streaming - START ONLY AFTER ASR IS READY
+  useEffect(() => {
+    if (!socket || !activeMeeting?._id || !localStream || !asrReady) return;
+
+    const audioTracks = localStream.getAudioTracks();
+    console.log('[client] recorder: audioTracks =', audioTracks.length, 'videoTracks=', localStream.getVideoTracks().length);
+    if (!audioTracks.length) {
+      console.warn('[client] recorder: no audio tracks — cannot stream to ASR');
+      return;
+    }
+
+    const audioOnlyStream = new MediaStream(audioTracks);
+    const preferred = 'audio/webm;codecs=opus';
+    const mimeType = MediaRecorder.isTypeSupported(preferred) ? preferred : 'audio/webm';
+
+    const mr = new MediaRecorder(audioOnlyStream, { mimeType, audioBitsPerSecond: 24000 });
+    mrRef.current = mr;
+
+    mr.ondataavailable = async (e) => {
+      if (!e.data || !e.data.size) return;
+      const buf = await e.data.arrayBuffer();
+      console.log('[client] chunk', e.data.size);
+      socket.emit('audio-chunk', {
+        meetingId: activeMeeting._id,
+        userId: user?._id,
+        username: user?.name,
+        codec: 'webm-opus',
+        blob: new Uint8Array(buf),
+      });
+    };
+
+    // Start AFTER DG is ready; small timeslice so header arrives fast
+    mr.start(150);
+    console.log('[client] MediaRecorder started (audio-only, 150ms)');
+
+    // Force an early flush — helps ensure the init segment/header is sent immediately
+    const flush = setTimeout(() => {
+      try { mr.requestData(); } catch {}
+    }, 50);
+
+    const onUpdate = (line) => setTranscript((prev) => [...prev, line]);
+    socket.on('transcript-update', onUpdate);
+
+    return () => {
+      clearTimeout(flush);
+      try { if (mr.state !== 'inactive') mr.stop(); } catch {}
+      socket.off('transcript-update', onUpdate);
+    };
+  }, [socket, activeMeeting?._id, localStream, asrReady, user?._id, user?.name]);
+
   const value = {
     activeMeeting,
     participants,
@@ -334,6 +436,7 @@ export const MeetingProvider = ({ children }) => {
     reactions,
     localStream,
     remoteStreams,
+    transcript,
     createMeeting,
     joinMeeting,
     leaveMeeting,

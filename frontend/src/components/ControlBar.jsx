@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Video, VideoOff, MonitorUp, MessageSquare, PhoneOff, Circle, Smile } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, MonitorUp, MessageSquare, PhoneOff, Circle, Smile, FileText } from 'lucide-react';
 import { useMeeting } from '../hooks/useMeeting';
 import { useSocket } from '../context/SocketContext';
 import { meetingService } from '../services/meetingService';
 
 const REACTIONS = ['👍', '👎', '❤️', '😂', '🎉', '🔥', '👏', '🙌'];
 
-const ControlBar = ({ onChatToggle, isRecording = false, isHost = false, onLeaveMeeting }) => {
+const ControlBar = ({ onChatToggle, onTranscriptToggle, isRecording = false, isHost = false, onLeaveMeeting }) => {
   const {
     isMuted,
     isVideoOff,
@@ -34,6 +34,9 @@ const ControlBar = ({ onChatToggle, isRecording = false, isHost = false, onLeave
     if (!activeMeeting?._id || !socket) return;
     socket.emit('host-end-meeting', { meetingId: activeMeeting._id });
     await meetingService.endMeeting?.(activeMeeting._id).catch(() => {});
+    meetingService.generateNotes?.(activeMeeting._id)
+      .then(() => console.log('AI notes generated'))
+      .catch((err) => console.error('AI notes generation failed', err));
     setShowEndConfirm(false);
     if (onLeaveMeeting) {
       onLeaveMeeting();
@@ -98,6 +101,13 @@ const ControlBar = ({ onChatToggle, isRecording = false, isHost = false, onLeave
       onClick: onChatToggle,
       bgColor: 'bg-gray-700 hover:bg-gray-600 shadow-lg',
       badge: chatBadge > 0 ? chatBadge : null,
+    },
+    {
+      icon: FileText,
+      label: 'Transcript',
+      onClick: onTranscriptToggle,
+      bgColor: 'bg-gray-700 hover:bg-gray-600 shadow-lg',
+      badge: null,
     },
     {
       icon: Smile,
