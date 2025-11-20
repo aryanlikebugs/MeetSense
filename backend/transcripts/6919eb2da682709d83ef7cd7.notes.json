@@ -1,0 +1,32 @@
+{
+  "title": "Magical Bookstore Roleplay Begins",
+  "summary": "The meeting commenced with initial greetings between the speakers. One participant promptly suggested transitioning into a role-playing scenario. A narrative then unfolded, introducing a magical bookstore situated in a cozy coastal town. This unique establishment was described as appearing quiet during the day but coming alive at night, with its books glowing as if imbued with their own magic.",
+  "decisions": [
+    {
+      "decision": "To dive into the roleplay.",
+      "by": "TBD",
+      "timestamp": "00:22"
+    }
+  ],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:22",
+      "note": "Suggestion to start roleplay."
+    },
+    {
+      "ts": "00:25",
+      "note": "Beginning of the magical bookstore narrative."
+    },
+    {
+      "ts": "00:39",
+      "note": "Description of glowing, magical books."
+    }
+  ],
+  "transcript_snippets": [
+    "Let's dive into the role now.",
+    "Once upon a time, in a cozy coastal town, there was a bookstore that",
+    "filled with books that seemed to glow as if they had their own magic."
+  ],
+  "confidence": "high"
+}

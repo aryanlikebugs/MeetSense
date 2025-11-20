@@ -1,0 +1,26 @@
+{
+  "title": "Activity Join & Training Discussion",
+  "summary": "The meeting commenced with initial greetings and a fragmented discussion centered around joining an activity, which appeared to be a game. A key point of discussion included a mention of \"guest or host training.\" One participant explicitly requested to join the activity. Another speaker confirmed their readiness and enthusiasm, stating they were \"in\" and felt \"this game enough.\"",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "01:20",
+      "note": "Mention of guest or host training"
+    },
+    {
+      "ts": "01:36",
+      "note": "Request to join the activity"
+    },
+    {
+      "ts": "01:39",
+      "note": "Participant confirms readiness"
+    }
+  ],
+  "transcript_snippets": [
+    "or host training",
+    "Join join, sir.",
+    "I'm in Yeah. I feel this game enough."
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Clarifying 'Code Nest' Terminology",
+  "summary": "The meeting involved a discussion around specific terminology. Initially, 'Live track' was briefly mentioned by the speakers. The primary focus then shifted to clarifying the terms 'Code nest' and 'ColdNest'. Speakers engaged in repeated discussion to identify or distinguish these terms. This suggests an effort to ensure common understanding of key project or product names.",
+  "decisions": [],
+  "action_items": [],
+  "key_timestamps": [
+    {
+      "ts": "00:12",
+      "note": "Live track mentioned."
+    },
+    {
+      "ts": "00:46",
+      "note": "Code nest discussed."
+    },
+    {
+      "ts": "00:50",
+      "note": "ColdNest mentioned."
+    }
+  ],
+  "transcript_snippets": [
+    "Live track.",
+    "Code nest. Code",
+    "ColdNest."
+  ],
+  "confidence": "high"
+}
